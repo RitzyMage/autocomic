@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+from comicGetter import comicGetter
+from pdfWriter import pdfWriter
+import json
+import signal
+
+killed = False
+def signalHandler(signum, frame):
+	global killed
+	if killed:
+		exit()
+	print('stopped; cleaning up...')
+	killed = True
+signal.signal(signal.SIGINT, signalHandler)
+
+with open('comic.json', 'r') as file:
+	info = json.load(file)
+	name = info["name"]
+	author = info["author"]
+	pageColor = info["pageColor"]
+	textColor = info["textColor"]
+	comicSelect = info["comicSelect"]
+	titleSelect = info["titleSelect"]
+	mouseover = info["mouseover"]
+	nextSelect = info["nextSelect"]
+	firstURL = info["firstURL"]
+	chapters = info["chapters"]
+	chapterElement = info["chapterElement"]
+	chapterRegex = info["chapterRegex"]
+	height = info.get("optionalHeight")
+
+pdf = pdfWriter(name, author, pageColor, textColor, height)
+comic = comicGetter(comicSelect, titleSelect, mouseover, nextSelect)
+
+if chapters:
+	comic.setChapters(chapterElement, chapterRegex)
+comic.setURLorPast(firstURL)
+
+while comic.validURL() and not killed:
+	print("getting comic", pdf.comicNumber + 1)
+	pdf.addComic(comic)
+	comic.save()
+	pdf.save()
+	comic.advance()
+
+pdf.finish()

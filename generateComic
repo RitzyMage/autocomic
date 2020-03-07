@@ -1,0 +1,26 @@
+#!/bin/bash
+mkdir $1
+cd $1 
+
+cat << EOF >> comic.json
+{
+    "name": "$1",
+    "author": "",
+
+    "pageColor": [255, 255, 255],
+    "textColor": "black",
+
+    "comicSelect": "",
+    "titleSelect": "",
+    "mouseover": false,
+
+    "nextSelect": "",
+    "firstURL": "",
+
+    "chapters": false,
+    "chapterElement": "",
+    "chapterRegex": "",
+
+    "optionalHeight":""
+}
+EOF

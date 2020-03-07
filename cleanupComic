@@ -1,0 +1,9 @@
+#!/bin/bash
+rm -f .url
+rm -f *.txt
+rm -f images/*
+rm -f result.*
+rm -f .index
+
+rmdir images 2>/dev/null
+rmdir latexFiles 2>/dev/null
