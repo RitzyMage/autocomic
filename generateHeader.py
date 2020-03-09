@@ -9,7 +9,6 @@ def generateHeader(name, author, pageColor, textColor, width, height, margin):
     \\usepackage{{fancyhdr}}
     \\usepackage{{sectsty}}
     \\usepackage{{tocloft}}
-    \\usepackage{{newunicodechar}}
 
     \\renewcommand\\cftchapfont{{\\LARGE\\bfseries}}
     \\renewcommand\\cftsecfont{{\\LARGE}}
