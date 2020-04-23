@@ -7,7 +7,7 @@ import os
 import re
 
 
-
+# gets comic info
 class comicGetter:
     def __init__(self, imgSelect: str, titleSelect: str, titleText: bool, nextSelect: str):
         self.imgSelect = CSSSelector(imgSelect)
@@ -31,11 +31,11 @@ class comicGetter:
         self.noQueryURL = ""
 
         self.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.118 Safari/537.36"
-
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-agent', self.userAgent)]
         urllib.request.install_opener(opener)
 
+    # PRIVATE
     def _getImage(self, html):
         imageTag = self.imgSelect(html)
         imageTag = imageTag[0]
@@ -92,6 +92,8 @@ class comicGetter:
                 self.chapterName = re.findall(self.chapterGet, text)[0]
 
     #PUBLIC
+
+    # gets all necessary data from given URL
     def setURL(self, url):
         if url == self.url:
             self.url = ""
@@ -110,6 +112,8 @@ class comicGetter:
         except IndexError:
             self.advance()
 
+    # same as set URL, but will prioritize an existing file conatining a URL if it exists.
+    # this allows the script to maintain state if ran in multiple sessions
     def setURLorPast(self, URL):
         if(os.path.isfile(self.urlFilename)):
             urlFile = open(self.urlFilename, 'r')
@@ -119,6 +123,7 @@ class comicGetter:
         else:
             self.setURL(URL)
 
+    # sets the current comic to the next comic
     def advance(self):
         try:
             os.remove(self.imageFile)
@@ -126,14 +131,17 @@ class comicGetter:
             pass
         self.setURL(self.next)
 
+    # save data to the file
     def save(self):
         urlFile = open(self.urlFilename, 'w')
         urlFile.write(self.url) 
         urlFile.close()
 
+    # returns true if the current URL is valid
     def validURL(self):
         return self.url != ""
     
+    # tells the ComicGetter to get chapter information
     def setChapters(self, chapterElement, chapterGet):
         self.chapterElement = CSSSelector(chapterElement)
         self.chapterGet = re.compile(chapterGet)

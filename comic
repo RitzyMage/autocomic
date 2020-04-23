@@ -4,6 +4,7 @@ from pdfWriter import pdfWriter
 import json
 import signal
 
+# so that if ^C is pressed, the script can clean up
 killed = False
 def signalHandler(signum, frame):
 	global killed

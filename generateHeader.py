@@ -1,3 +1,4 @@
+# generates a header for the resulting LaTeX file
 def generateHeader(name, author, pageColor, textColor, width, height, margin):
     header = """\\documentclass{{book}}
     \\usepackage[utf8]{{inputenc}}

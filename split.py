@@ -6,6 +6,12 @@ import os
 from PIL import Image
 import imghdr
 
+# this file includes functions to split an image along reasonable split points.
+# if a comic is too tall for a page, this will split it along reasonable lines.
+
+#given an image, returns an array containing a number between 0 and 1 describing how much
+#variation there is, with 0 being no variation and 1 being a lot of variation.
+#channel is the image channel (R/G/B/A)
 def getChannelVariation(image, channel):
 	channel =  np.copy(image[:,:,channel])
 
@@ -17,6 +23,8 @@ def getChannelVariation(image, channel):
 	average = np.average(channel)
 	return deviations / average
 
+# given an image, finds which rows to split on. 
+# defaultSplit is what interval the split should return if no good split points can be found
 def getSplitPoints(image, defaultSplit):
 	marginWidth = int(len(image[0]) / 6)
 	imageCenter = image[:,marginWidth:int(len(image[0]) - marginWidth),:]
@@ -47,7 +55,8 @@ def getSplitPoints(image, defaultSplit):
 			split += defaultSplit
 
 	return ranges
-	
+
+# splits an image into multiple parts. Returns the filenames of the split version.
 def split(imageFile, defaultSplit, axis=0):
 	fileExtensions = ['jpg', 'gif', 'png']
 	if not any(s in imageFile for s in fileExtensions):
