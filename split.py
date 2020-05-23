@@ -9,55 +9,113 @@ import imghdr
 # this file includes functions to split an image along reasonable split points.
 # if a comic is too tall for a page, this will split it along reasonable lines.
 
-#given an image, returns an array containing a number between 0 and 1 describing how much
-#variation there is, with 0 being no variation and 1 being a lot of variation.
-#channel is the image channel (R/G/B/A)
-def getChannelVariation(image, channel):
-	channel =  np.copy(image[:,:,channel])
+#given an image, returns an array containing numbers between 0 and 1 describing how much
+#variation there is on each row, with 0 being no variation and 1 being a lot of variation.
+#channel is the image channel (R=0/G=1/B=2/A=3)
+def getChannelVariation(channel, average):
+	channel = np.copy(channel)
+
+	uniqueFactor = getUniquePerRow(channel)
 
 	channel.sort(axis=1)
-	numOutliers = 6
+	numOutliers = 2
 	channel = channel[:,numOutliers: channel.shape[1] - numOutliers]
 
-	deviations = np.std(channel, axis=1)
-	average = np.average(channel)
-	return deviations / average
+	deviations = np.std(channel, axis=1) / average
 
-# given an image, finds which rows to split on. 
-# defaultSplit is what interval the split should return if no good split points can be found
-def getSplitPoints(image, defaultSplit):
-	marginWidth = int(len(image[0]) / 6)
-	imageCenter = image[:,marginWidth:int(len(image[0]) - marginWidth),:]
+	return (0.1 * deviations + 0.9 * uniqueFactor)
 
-	red_variation = getChannelVariation(imageCenter, 0)
-	green_variation = getChannelVariation(imageCenter, 1)
-	blue_variation = getChannelVariation(imageCenter, 2)
+def getUniquePerRow(channel):
+	uniqueCounts = (np.abs(scaleArray(channel[:,1:]) - scaleArray(channel[:,:-1])) > 0.2).sum(axis=1)+1
+	maxUnique = np.max(uniqueCounts)
+	uniquePercentage = uniqueCounts / maxUnique
 
-	total_variation = (red_variation + green_variation + blue_variation) / 3
-	candidates = (total_variation < 0.1).nonzero()[0]
-	ranges = np.split(candidates, np.where(np.diff(candidates) != 1)[0]+1)
+	return uniquePercentage
 
-	if len(ranges[0]) > 0:
-		if ranges[0][0] == 0:
-			ranges = ranges[1:]
+def getVariations(imageData):
 
-		end = len(ranges) - 1
-		if len(ranges) > 0 and image.shape[0] - ranges[end][len(ranges[end]) - 1] <= 3:
-			ranges = ranges[:end]
+	red_variation = getChannelVariation(imageData["r"], imageData["redMean"])
+	green_variation = getChannelVariation(imageData["g"], imageData["greenMean"])
+	blue_variation = getChannelVariation(imageData["b"], imageData["blueMean"])
 
-		for i in range(len(ranges)):
-			ranges[i] = int(np.average(ranges[i]))
-	else:
-		ranges = []
-		split = defaultSplit
-		while split < image.shape[1]:
-			ranges.append(split)
-			split += defaultSplit
+	return (red_variation + green_variation + blue_variation) / 3
 
-	return ranges
+def scaleArray(array):
+	if np.max(array) > 1:
+		return array / 255
+	return array
+
+def scaleValue(mean):
+	if (mean > 1):
+		return mean / 255
+	return mean
+
+def getDifferentFactor(row, imageMean):
+	imageMean = scaleValue(imageMean)
+	rowMean = scaleValue(np.average(row))
+
+	if (rowMean < imageMean):
+		return (-rowMean / imageMean) + 1
+	return ((rowMean - imageMean) / (1 - imageMean))
+
+
+def getDifferentFactors(imageData):
+	redFactor = np.apply_along_axis(getDifferentFactor, 1, imageData['r'], imageData['redMean'])
+	greenFactor = np.apply_along_axis(getDifferentFactor, 1, imageData['g'], imageData['greenMean'])
+	blueFactor = np.apply_along_axis(getDifferentFactor, 1, imageData['b'], imageData['blueMean'])
+
+	return (redFactor + greenFactor + blueFactor) / 3
+
+def getRowNearCenter(height):
+	values = np.arange(height)
+	return -(np.abs((2 / height) * values - 1) ** 3) + 1
+
+def findBestSplitIndex(image, centerWeight):
+	
+	red =  np.copy(image[:,:,0])
+	green =  np.copy(image[:,:,1])
+	blue =  np.copy(image[:,:,2])
+
+	redAverage = np.average(red)
+	greenAverage = np.average(green)
+	blueAverage = np.average(blue)
+
+	imageData = {
+		"r": red,
+		"g": green,
+		"b": blue,
+		"redMean": redAverage,
+		"greenMean": greenAverage,
+		"blueMean": blueAverage,
+	}
+
+	solidColor = 1 - getVariations(imageData)
+	differences = getDifferentFactors(imageData)
+	nearCenter = getRowNearCenter(len(image))
+
+	finalFitness = solidColor + differences + centerWeight * nearCenter
+	#for i in [366, 831]:
+	#	print("{0}: ({1}, {2}, {3})".format(i, solidColor[i], differences[i], nearCenter[i]))
+
+	splitPoint = np.argmax(finalFitness)
+
+	edgeOffset = 5
+	if splitPoint == 0:
+		splitPoint += edgeOffset
+	elif splitPoint == len(finalFitness) - 1:
+		splitPoint -= edgeOffset
+
+	return splitPoint
+
+def split(image, maxHeight, centerWeight=1):
+	if (len(image) <= maxHeight):
+		return [image]
+	
+	splitIndex = findBestSplitIndex(image, centerWeight)
+	return split(image[:splitIndex], maxHeight) + split(image[splitIndex:], maxHeight)
 
 # splits an image into multiple parts. Returns the filenames of the split version.
-def split(imageFile, defaultSplit, axis=0):
+def splitFile(imageFile, maxHeight, axis=0):
 	fileExtensions = ['jpg', 'gif', 'png']
 	if not any(s in imageFile for s in fileExtensions):
 		imageType = imghdr.what(imageFile)
@@ -69,22 +127,19 @@ def split(imageFile, defaultSplit, axis=0):
 	imageInit.save(imageFile)
 
 	image = img.imread(imageFile)
+	images = []
+
 	if axis is not 0:
 		image = np.transpose(image, (1, 0, 2))
-
-	lineIndexes = getSplitPoints(image, defaultSplit) 
-	last = 0
-	images = []
-	for i in lineIndexes:
-		images.append(image[last:i+1])
-		last = i+1
-	images.append(image[last:])
+		images = split(image, maxHeight, 5)
+	else:
+		images = split(image, maxHeight)
 
 	imageNames=[]
 
 	num = 0
 	for subImage in images:
-		name = "images/" + os.path.splitext(imageFile)[0] + "-" + str(num) + ".png"
+		name = "images/" + os.path.splitext(os.path.basename(imageFile))[0] + "-" + str(num) + ".png"
 		if axis is not 0:
 			subImage = np.transpose(subImage, (1, 0, 2))
 		img.imsave(name, subImage)
@@ -92,3 +147,6 @@ def split(imageFile, defaultSplit, axis=0):
 		num += 1
 
 	return imageNames
+
+if __name__ == "__main__":
+	splitFile(sys.argv[1], 1040, 0)

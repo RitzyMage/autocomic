@@ -19,7 +19,7 @@ class comicGetter:
         self.nextSelect = CSSSelector(nextSelect)
         self.url = ""
         self.next = ""
-        self.imageFile = ""
+        self.imageFiles = []
         self.baseURL = ""
         self.basePath = ""
         self.titleText = ""
@@ -36,19 +36,24 @@ class comicGetter:
         urllib.request.install_opener(opener)
 
     # PRIVATE
-    def _getImage(self, html):
-        imageTag = self.imgSelect(html)
-        imageTag = imageTag[0]
-
-        if (imageTag.get('src') is not None):
+    def _downloadImage(self, imageTag):
             imageURL = self._getFullURL(imageTag.get('src').strip().replace(' ', '%20'))
-            self.imageFile = imageURL.split('/')[-1].split('?')[0]
-            urllib.request.urlretrieve(imageURL, self.imageFile)
-        else:
-            raise IndexError()
+            filename = imageURL.split('/')[-1].split('?')[0]
+            urllib.request.urlretrieve(imageURL, filename)
+            return filename
 
-        if (self.hasTitleText):
-            self.titleText = imageTag.get('title')
+
+    def _getImage(self, html):
+        imageTags = self.imgSelect(html)
+        self.imageFiles = []
+        for imageTag in imageTags:
+            if (imageTag.get('src') is not None):
+                self.imageFiles.append(self._downloadImage(imageTag))
+            else:
+                raise IndexError()
+
+            if (self.hasTitleText):
+                self.titleText = imageTag.get('title')
 
     def _getTitle(self, html):
         if self.titleSelect:
@@ -57,10 +62,9 @@ class comicGetter:
 
     def _getNext(self, html):
         nextTag = self.nextSelect(html)
-
         if len(nextTag) is 0 or nextTag[0].get('href') is None:
             self.next = ""
-        else:
+        else:   
             self.next = self._getFullURL(nextTag[len(nextTag) - 1].get('href'))
 
     def _getHTML(self):
@@ -113,7 +117,7 @@ class comicGetter:
             self.advance()
 
     # same as set URL, but will prioritize an existing file conatining a URL if it exists.
-    # this allows the script to maintain state if ran in multiple sessions
+    # this allows the script to maintain state if ran in multiple sessions.
     def setURLorPast(self, URL):
         if(os.path.isfile(self.urlFilename)):
             urlFile = open(self.urlFilename, 'r')
@@ -123,10 +127,11 @@ class comicGetter:
         else:
             self.setURL(URL)
 
-    # sets the current comic to the next comic
+    # sets the current comic to the next comic.
     def advance(self):
         try:
-            os.remove(self.imageFile)
+            for file in self.imageFiles:
+                os.remove(file)
         except OSError:
             pass
         self.setURL(self.next)
@@ -137,11 +142,11 @@ class comicGetter:
         urlFile.write(self.url) 
         urlFile.close()
 
-    # returns true if the current URL is valid
+    # returns true if the current URL is valid.
     def validURL(self):
         return self.url != ""
     
-    # tells the ComicGetter to get chapter information
+    # tells the comicGetter to get chapter information
     def setChapters(self, chapterElement, chapterGet):
         self.chapterElement = CSSSelector(chapterElement)
         self.chapterGet = re.compile(chapterGet)

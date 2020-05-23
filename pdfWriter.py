@@ -4,7 +4,7 @@ import os
 from PIL import Image
 import shutil
 import subprocess
-from split import split
+from split import splitFile
 
 def escapeString(toEscape):
     return toEscape.translate(
@@ -40,9 +40,9 @@ def getResizedDims(width, image):
     newWidth = int(image.size[0] * percentSmaller)
     return newWidth, newHeight
 
-def getImageDims(filename, width):
+def getImageDims(filename):
     image = Image.open(filename)
-    return getResizedDims(width, image)
+    return image.size #getResizedDims(width, image)
 
 def shrinkImage(filename, width, name, number, bgColor, suffix=""):
     image = Image.open(filename)
@@ -57,15 +57,19 @@ def shrinkImage(filename, width, name, number, bgColor, suffix=""):
     return newFilename
 
 class pdfWriter:
-    def __init__(self, name, author, pageColor, textColor, optionalHeight):
+    def __init__(self, name, author, pageColor, textColor, optionalHeight, optionalWidth):
         self.title = name
 
-        self.pageWidth = 780
         if optionalHeight:
-            self.pageHeight = optionalHeight
+            self.pageHeight = int(optionalHeight)
         else:
             self.pageHeight = 1200
-        self.margin = 30
+
+        if optionalWidth: 
+            self.pageWidth = int(optionalWidth)
+        else:
+            self.pageWidth = 800
+        self.margin = 20
         self.workWidth = self.pageWidth - (2 * self.margin)
         self.workHeight = self.pageHeight - (2 * self.margin)
         self.comicNumber = 0
@@ -90,27 +94,30 @@ class pdfWriter:
             os.makedirs('images')
 
     def addComic(self, comic):
+        for image in comic.imageFiles:
+            self._addComic(comic, image)
+    
+    def _addComic(self, comic, image):
         self.comicNumber += 1
-        width, height = getImageDims(comic.imageFile, self.workWidth)
-        widthFactor = 2
-        proportions = 2.5
+        width, height = getImageDims(image)
+        widthFactor = 1.3
 
         self._addChapterName(comic)
 
-        if width >= self.workWidth * widthFactor and width > height * proportions:
-            images = split(comic.imageFile, self.workWidth, axis=1)
-            for image in images:
-                self._addComicFullWidth(height, comic, image)
+        if width >= self.workWidth * widthFactor and height < self.workHeight:
+            images = splitFile(image, self.workWidth, axis=1)
+            for i in range(len(images)):
+                self._addComicFullWidth(height, comic, images[i], suffix="h" + str(i))
         else:
-            self._addComicFullWidth(height, comic, comic.imageFile)
+            self._addComicFullWidth(height, comic, image)
 
-    def _addComicFullWidth(self, height, comic, image):
-        textSize = 20
-        if height + textSize < self.workHeight:
-            image = self._getComicImage(image)
+    def _addComicFullWidth(self, height, comic, image, suffix=""):
+        if height < self.workHeight:
+            image = self._getComicImage(image, suffix)
             self._addComicInfo(comic.title, image, comic.titleText)
         else:
-            images = split(image, self.workWidth)
+            splitHeight = min(1, getImageDims(image)[0] / self.workWidth) * (self.workHeight + self.margin)
+            images = splitFile(image, splitHeight)
             for i in range(len(images)):
                 image = self._getComicImage(images[i], suffix="p" + str(i))
                 self._addComicInfo(comic.title if i is 0 else "", image, comic.titleText if i is len(images) - 1 else "")

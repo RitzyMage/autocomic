@@ -29,8 +29,9 @@ with open('comic.json', 'r') as file:
 	chapterElement = info["chapterElement"]
 	chapterRegex = info["chapterRegex"]
 	height = info.get("optionalHeight")
+	width = info.get("optionalWidth")
 
-pdf = pdfWriter(name, author, pageColor, textColor, height)
+pdf = pdfWriter(name, author, pageColor, textColor, height, width)
 comic = comicGetter(comicSelect, titleSelect, mouseover, nextSelect)
 
 if chapters:

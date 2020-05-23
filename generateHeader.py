@@ -20,25 +20,40 @@ def generateHeader(name, author, pageColor, textColor, width, height, margin):
     \\sectionfont{{\\fontsize{{50}}{{15}}\\selectfont}}
     \\setcounter{{secnumdepth}}{{0}}
 
+    \\setlength{{\\lineskip}}{{0pt}}
+
     \\renewcommand\\cftchapafterpnum{{\\vskip25pt}}
     \\renewcommand\\cftsecafterpnum{{\\vskip25pt}}
     
     \\def \\ifempty#1{{\\def\\temp{{#1}}\\ifx\\temp\\empty }}
     
     \\newcommand{{\\comic}}[3]{{
-        \\begin{{minipage}}{{\\textwidth}}
-            \\vspace{{-5px}}
+        \\begingroup
+        \\par
+        \\setlength{{\\baselineskip}}{{0pt}}
+        \\begin{{samepage}}
+
             \\ifempty{{#1}}
             \\else
                 \\vspace{{10px}}
                 {{\\fontfamily{{qag}}\\selectfont{{\\huge#1\\\\}}}}
+                \\nopagebreak
+                \\vspace{{2px}}
             \\fi
+
             \\centerline{{\\includegraphics{{#2}}}}
+
             \\ifempty{{#3}}
             \\else
+                \\vspace{{5px}}
+                \\nopagebreak
                 {{\\Large\\textit{{\\newline #3\\newline}}\\\\}}
+                \\vspace{{10px}}
             \\fi
-        \\end{{minipage}}
+
+        \\end{{samepage}}
+        \\par
+        \\endgroup
     }}
     
     \\fancypagestyle{{plain}}{{
