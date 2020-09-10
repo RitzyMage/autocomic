@@ -2,9 +2,11 @@
 mkdir $1
 cd $1 
 
+name="$(echo "$1" | sed -r -e 's/(.)([A-Z])/\1 \2/g' -e 's/.*/\u&/')"
+
 cat << EOF >> comic.json
 {
-    "name": "$1",
+    "name": "$name",
     "author": "",
 
     "pageColor": [255, 255, 255],
@@ -17,11 +19,13 @@ cat << EOF >> comic.json
     "nextSelect": "",
     "firstURL": "",
 
+
     "chapters": false,
     "chapterElement": "",
     "chapterRegex": "",
 
     "optionalHeight":"",
-    "optionalWidth":""
+    "optionalWidth":"",
+    "jpgQuality":""
 }
 EOF

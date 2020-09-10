@@ -36,15 +36,15 @@ def remove_transparency(im, bg_color=(255, 255, 255)):
 
 def getResizedDims(width, image):
     percentSmaller = min(width / float(image.size[0]), 1)
-    newHeight = int(image.size[1] * percentSmaller)
-    newWidth = int(image.size[0] * percentSmaller)
+    newHeight = max(int(image.size[1] * percentSmaller), 1)
+    newWidth = max(int(image.size[0] * percentSmaller), 1)
     return newWidth, newHeight
 
 def getImageDims(filename):
     image = Image.open(filename)
     return image.size #getResizedDims(width, image)
 
-def shrinkImage(filename, width, name, number, bgColor, suffix=""):
+def shrinkImage(filename, width, name, number, bgColor, quality, suffix=""):
     image = Image.open(filename)
 
     newWidth, newHeight = getResizedDims(width, image) 
@@ -52,12 +52,12 @@ def shrinkImage(filename, width, name, number, bgColor, suffix=""):
     image = image.resize((newWidth, newHeight), Image.ANTIALIAS)
     image = remove_transparency(image, bgColor)
     newFilename = "images/" + name + "-" + str(number) + suffix + ".jpg"
-    image.save(newFilename, quality=95)
+    image.save(newFilename, quality=quality)
 
     return newFilename
 
 class pdfWriter:
-    def __init__(self, name, author, pageColor, textColor, optionalHeight, optionalWidth):
+    def __init__(self, name, author, pageColor, textColor, optionalHeight, optionalWidth, jpgQuality):
         self.title = name
 
         if optionalHeight:
@@ -69,6 +69,12 @@ class pdfWriter:
             self.pageWidth = int(optionalWidth)
         else:
             self.pageWidth = 800
+
+        if jpgQuality:
+            self.jpgQuality = jpgQuality
+        else:
+            self.jpgQuality = 95
+
         self.margin = 20
         self.workWidth = self.pageWidth - (2 * self.margin)
         self.workHeight = self.pageHeight - (2 * self.margin)
@@ -80,6 +86,8 @@ class pdfWriter:
         self.headerFile = "header.txt"
 
         self.pageColor = pageColor
+
+        self.addTitle = True
 
         self.indexFilename = ".index"
         if(os.path.isfile(self.indexFilename)):
@@ -94,8 +102,10 @@ class pdfWriter:
             os.makedirs('images')
 
     def addComic(self, comic):
+        self.addTitle = True
         for image in comic.imageFiles:
             self._addComic(comic, image)
+            self.addTitle = False
     
     def _addComic(self, comic, image):
         self.comicNumber += 1
@@ -108,19 +118,20 @@ class pdfWriter:
             images = splitFile(image, self.workWidth, axis=1)
             for i in range(len(images)):
                 self._addComicFullWidth(height, comic, images[i], suffix="h" + str(i))
+                self.addTitle = False
         else:
             self._addComicFullWidth(height, comic, image)
 
     def _addComicFullWidth(self, height, comic, image, suffix=""):
         if height < self.workHeight:
             image = self._getComicImage(image, suffix)
-            self._addComicInfo(comic.title, image, comic.titleText)
+            self._addComicInfo(comic.title if self.addTitle and comic.title else "", image, comic.titleText if self.addTitle else "")
         else:
             splitHeight = min(1, getImageDims(image)[0] / self.workWidth) * (self.workHeight + self.margin)
             images = splitFile(image, splitHeight)
             for i in range(len(images)):
                 image = self._getComicImage(images[i], suffix="p" + str(i))
-                self._addComicInfo(comic.title if i is 0 else "", image, comic.titleText if i is len(images) - 1 else "")
+                self._addComicInfo(comic.title if i is 0 and self.addTitle and comic.title else "", image, comic.titleText if i is len(images) - 1 and self.addTitle else "")
                 os.remove(images[i])
     
     def _addChapterName(self, comic):
@@ -160,7 +171,7 @@ class pdfWriter:
 
     def _getComicImage(self, comic, suffix=""):
         title = ''.join(e for e in self.title if e.isalnum())
-        return shrinkImage(comic, self.workWidth, title, self.comicNumber, self.pageColor, suffix)
+        return shrinkImage(comic, self.workWidth, title, self.comicNumber, self.pageColor, self.jpgQuality, suffix)
     
     def _addComicInfo(self, title, image, mouseover):
         mouseover = escapeString(mouseover if mouseover else "")

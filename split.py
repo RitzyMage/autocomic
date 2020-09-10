@@ -125,9 +125,9 @@ def splitFile(imageFile, maxHeight, axis=0):
 		
 	imageInit = Image.open(imageFile).convert('RGB')
 	imageInit.save(imageFile)
-
+	image = None
+	
 	image = img.imread(imageFile)
-	images = []
 
 	if axis is not 0:
 		image = np.transpose(image, (1, 0, 2))
@@ -142,7 +142,7 @@ def splitFile(imageFile, maxHeight, axis=0):
 		name = "images/" + os.path.splitext(os.path.basename(imageFile))[0] + "-" + str(num) + ".png"
 		if axis is not 0:
 			subImage = np.transpose(subImage, (1, 0, 2))
-		img.imsave(name, subImage)
+		img.imsave(name, subImage.copy(order='C'))
 		imageNames.append(name)
 		num += 1
 

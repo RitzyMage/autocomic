@@ -29,6 +29,7 @@ def generateHeader(name, author, pageColor, textColor, width, height, margin):
     
     \\newcommand{{\\comic}}[3]{{
         \\begingroup
+        \\raggedbottom
         \\par
         \\setlength{{\\baselineskip}}{{0pt}}
         \\begin{{samepage}}
