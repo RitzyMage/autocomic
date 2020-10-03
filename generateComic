@@ -4,28 +4,28 @@ cd $1
 
 name="$(echo "$1" | sed -r -e 's/(.)([A-Z])/\1 \2/g' -e 's/.*/\u&/')"
 
-cat << EOF >> comic.json
-{
-    "name": "$name",
-    "author": "",
+cat << EOF >> comic.yml
+name: $name
+author: 
 
-    "pageColor": [255, 255, 255],
-    "textColor": "black",
+pageColor: [255, 255, 255]
+textColor: black
 
-    "comicSelect": "",
-    "titleSelect": "",
-    "mouseover": false,
+comicSelect: 
+titleSelect:
+mouseover: false
 
-    "nextSelect": "",
-    "firstURL": "",
+nextSelect: 
+firstURL: 
 
 
-    "chapters": false,
-    "chapterElement": "",
-    "chapterRegex": "",
+chapters: false
+chapterElement:
+chapterRegex:
 
-    "optionalHeight":"",
-    "optionalWidth":"",
-    "jpgQuality":""
-}
+optionalHeight:
+optionalWidth: 
+jpgQuality:
+
+useCSS: true
 EOF
