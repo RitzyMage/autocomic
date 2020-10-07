@@ -23,7 +23,7 @@ class comicGetter:
         self.chapterGet = ""
         self.chapterName = ""
         self.noQueryURL = ""
-        self.useCSS = True if useCSS is None else False
+        self.useCSS = True if useCSS is None or useCSS is True else False
         self.nextSelect = CSSSelector(nextSelect) if self.useCSS else re.compile(nextSelect)
         self.imgSelect = CSSSelector(imgSelect) if self.useCSS else re.compile(imgSelect)
         if titleSelect and len(titleSelect) != 0: 
