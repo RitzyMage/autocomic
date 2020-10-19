@@ -130,7 +130,7 @@ class comicGetter:
             self._getImage(html)
             self._getTitle(html)
             self._getChapter(html)
-        except requests.exceptions.RequestException:
+        except (requests.exceptions.RequestException, urllib.error.HTTPError):
             self.url = ""
         except IndexError:
             self.advance()
