@@ -1,5 +1,6 @@
 import requests
 import lxml.html
+from requests_html import HTML
 from lxml.cssselect import CSSSelector
 import urllib.request
 from urllib.parse import urlparse
@@ -9,7 +10,7 @@ import re
 
 # gets comic info
 class comicGetter:
-    def __init__(self, imgSelect: str, titleSelect: str, titleText: bool, nextSelect: str, useCSS):
+    def __init__(self, imgSelect: str, titleSelect: str, titleText: bool, nextSelect: str, useCSS, runJavascript):
         self.hasTitleText = titleText
         self.url = ""
         self.next = ""
@@ -24,6 +25,7 @@ class comicGetter:
         self.chapterName = ""
         self.noQueryURL = ""
         self.useCSS = True if useCSS is None or useCSS is True else False
+        self.runJavascript = False if runJavascript is None or runJavascript is False else True
         self.nextSelect = CSSSelector(nextSelect) if self.useCSS else re.compile(nextSelect)
         self.imgSelect = CSSSelector(imgSelect) if self.useCSS else re.compile(imgSelect)
         if titleSelect and len(titleSelect) != 0: 
@@ -85,8 +87,12 @@ class comicGetter:
             self.next = self._getFullURL(nextTag[len(nextTag) - 1].get('href'))
 
     def _getHTML(self):
-        return lxml.html.fromstring(requests.get(self.url, 
-        headers={"User-agent":self.userAgent}).text)
+        text = requests.get(self.url, headers={"User-agent": self.userAgent}).text
+        if self.runJavascript:
+            html = HTML(html=text)
+            html.render()
+            text = html.html
+        return lxml.html.fromstring(text)
 
     def _updateBaseURL(self):
         info = urlparse(self.url)

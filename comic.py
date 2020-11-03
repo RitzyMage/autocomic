@@ -36,9 +36,10 @@ with open(filename, 'r') as file:
 	width = info.get("optionalWidth")
 	jpgQuality = info.get("jpgQuality")
 	useCss = info.get("useCSS")
+	runJavascript = info.get("runJavascript")
 
 pdf = pdfWriter(name, author, pageColor, textColor, height, width, jpgQuality)
-comic = comicGetter(comicSelect, titleSelect, mouseover, nextSelect, useCss)
+comic = comicGetter(comicSelect, titleSelect, mouseover, nextSelect, useCss, runJavascript)
 
 if chapters:
 	comic.setChapters(chapterElement, chapterRegex)
