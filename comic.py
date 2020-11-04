@@ -46,11 +46,14 @@ if chapters:
 
 comic.setURLorPast(firstURL)
 
-while comic.validURL() and not killed:
-	print("getting comic", pdf.comicNumber + 1)
-	pdf.addComic(comic)
-	comic.save()
-	pdf.save()
-	comic.advance()
-
+try:
+	while comic.validURL() and not killed:
+		print("getting comic", pdf.comicNumber + 1)
+		pdf.addComic(comic)
+		comic.save()
+		pdf.save()
+		comic.advance()
+except RuntimeError:
+	print("Warning: pressing ^C when running javascipt could have unintended consequences")
+	
 pdf.finish()

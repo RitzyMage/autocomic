@@ -41,9 +41,9 @@ class comicGetter:
     # PRIVATE
     def _downloadImage(self, imageTag):
             imageURL = self._getFullURL(imageTag.get('src').strip().replace(' ', '%20'))
-            filename = imageURL.split('/')[-1].split('?')[0]
-            urllib.request.urlretrieve(imageURL, filename)
-            return filename
+            local_filename = urllib.request.urlretrieve(imageURL)[0]
+        
+            return local_filename
 
 
     def _getImage(self, html):
@@ -90,7 +90,7 @@ class comicGetter:
         text = requests.get(self.url, headers={"User-agent": self.userAgent}).text
         if self.runJavascript:
             html = HTML(html=text)
-            html.render()
+            html.render(timeout=60)
             text = html.html
         return lxml.html.fromstring(text)
 
