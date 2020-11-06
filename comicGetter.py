@@ -26,10 +26,10 @@ class comicGetter:
         self.noQueryURL = ""
         self.useCSS = True if useCSS is None or useCSS is True else False
         self.runJavascript = False if runJavascript is None or runJavascript is False else True
-        self.nextSelect = CSSSelector(nextSelect) if self.useCSS else re.compile(nextSelect)
-        self.imgSelect = CSSSelector(imgSelect) if self.useCSS else re.compile(imgSelect)
+        self.nextSelect = CSSSelector(nextSelect) if self.useCSS else re.compile(nextSelect, re.IGNORECASE)
+        self.imgSelect = CSSSelector(imgSelect) if self.useCSS else re.compile(imgSelect, re.IGNORECASE)
         if titleSelect and len(titleSelect) != 0: 
-            self.titleSelect = CSSSelector(titleSelect) if self.useCSS else re.compile(titleSelect)
+            self.titleSelect = CSSSelector(titleSelect) if self.useCSS else re.compile(titleSelect, re.IGNORECASE)
         else:
             self.titleSelect = None
 
@@ -52,7 +52,7 @@ class comicGetter:
         if self.useCSS:
             imageTags = self.imgSelect(html)
         else:
-            imageStrings = re.findall(self.imgSelect, lxml.html.tostring(html).decode("utf-8"))
+            imageStrings = re.findall(self.imgSelect, html)
             imageTags = list(map(lambda image: lxml.html.fromstring(image), imageStrings))
 
         self.imageFiles = []
@@ -71,7 +71,7 @@ class comicGetter:
             if self.useCSS:
                 titleTag = self.titleSelect(html)[0]
             else:
-                titleTag = lxml.html.fromstring(re.search(self.titleSelect, lxml.html.tostring(html).decode("utf-8")))
+                titleTag = lxml.html.fromstring(re.search(self.titleSelect, html))
             self.title = titleTag.text
 
     def _getNext(self, html):
@@ -79,7 +79,7 @@ class comicGetter:
         if self.useCSS:
             nextTag = self.nextSelect(html)
         else:
-            nextTags = re.findall(self.nextSelect, lxml.html.tostring(html).decode("utf-8"))
+            nextTags = re.findall(self.nextSelect, html)
             nextTag = list(map(lambda tag: lxml.html.fromstring(tag), nextTags))
         if len(nextTag) == 0 or nextTag[len(nextTag) - 1].get('href') is None:
             self.next = ""
@@ -92,6 +92,8 @@ class comicGetter:
             html = HTML(html=text)
             html.render(timeout=60)
             text = html.html
+        if not self.useCSS:
+            return text
         return lxml.html.fromstring(text)
 
     def _updateBaseURL(self):
@@ -130,7 +132,7 @@ class comicGetter:
 
         self.url = url
         self._updateBaseURL()
-        try:   
+        try:
             html = self._getHTML()
             self._getNext(html)
             self._getImage(html)
@@ -174,4 +176,4 @@ class comicGetter:
     # tells the comicGetter to get chapter information
     def setChapters(self, chapterElement, chapterGet):
         self.chapterElement = CSSSelector(chapterElement)
-        self.chapterGet = re.compile(chapterGet)
+        self.chapterGet = re.compile(chapterGet, re.IGNORECASE)

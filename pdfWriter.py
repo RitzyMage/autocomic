@@ -1,10 +1,12 @@
 from comicGetter import comicGetter
 from generateHeader import generateHeader
 import os
-from PIL import Image
+from PIL import Image, ImageFile
 import shutil
 import subprocess
 from split import splitFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def escapeString(toEscape):
     return toEscape.translate(
@@ -131,13 +133,13 @@ class pdfWriter:
             images = splitFile(image, splitHeight)
             for i in range(len(images)):
                 image = self._getComicImage(images[i], suffix="p" + str(i))
-                self._addComicInfo(comic.title if i is 0 and self.addTitle and comic.title else "", image, comic.titleText if i is len(images) - 1 and self.addTitle else "")
+                self._addComicInfo(comic.title if i == 0 and self.addTitle and comic.title else "", image, comic.titleText if i is len(images) - 1 and self.addTitle else "")
                 os.remove(images[i])
     
     def _addChapterName(self, comic):
         name = escapeString(comic.chapterName)
         if name != "" and name != self.lastChapterName:
-            if self.comicNumber is 1:
+            if self.comicNumber == 1:
                 with open(self.bodyFile,'a') as comics:
                     comics.write("\t\\begingroup\\let\\cleardoublepage\\clearpage\\tableofcontents\\endgroup\n")
          
