@@ -23,26 +23,14 @@ with open(filename, 'r') as file:
 	author = info["author"]
 	pageColor = info["pageColor"]
 	textColor = info["textColor"]
-	comicSelect = info["comicSelect"]
-	titleSelect = info["titleSelect"]
-	mouseover = info["mouseover"]
-	nextSelect = info["nextSelect"]
 	firstURL = info["firstURL"]
-	chapters = info["chapters"]
 
-	chapterElement = info["chapterElement"]
-	chapterRegex = info["chapterRegex"]
 	height = info.get("optionalHeight")
 	width = info.get("optionalWidth")
 	jpgQuality = info.get("jpgQuality")
-	useCss = info.get("useCSS")
-	runJavascript = info.get("runJavascript")
 
 pdf = pdfWriter(name, author, pageColor, textColor, height, width, jpgQuality)
-comic = comicGetter(comicSelect, titleSelect, mouseover, nextSelect, useCss, runJavascript)
-
-if chapters:
-	comic.setChapters(chapterElement, chapterRegex)
+comic = comicGetter(info)
 
 comic.setURLorPast(firstURL)
 
