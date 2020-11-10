@@ -32,7 +32,7 @@ with open(filename, 'r') as file:
 pdf = pdfWriter(name, author, pageColor, textColor, height, width, jpgQuality)
 comic = comicGetter(info)
 
-comic.setURLorPast(firstURL)
+comic.setURLifUnset(firstURL)
 
 try:
 	while comic.validURL() and not killed:

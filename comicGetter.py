@@ -18,7 +18,7 @@ class comicGetter:
 		self.titleText = ""
 		self.title = ""
 		self.chapterName = ""
-		
+
 		self.urlFilename = ".url"
 
 
@@ -38,8 +38,51 @@ class comicGetter:
 		
 		self.webpageGetter = webpageGetter(runJavascript)
 
+	#PUBLIC
+
+	def setURLifUnset(self, URL):
+		if(os.path.isfile(self.urlFilename)):
+			urlFile = open(self.urlFilename, 'r')
+			self._setURL(urlFile.readline())
+			urlFile.close()
+			self.advance()
+		else:
+			self._setURL(URL)
+
+	def advance(self):
+		try:
+			for file in self.imageFiles:
+				os.remove(file)
+		except OSError:
+			pass
+		self._setURL(self.next)
+
+	def save(self):
+		urlFile = open(self.urlFilename, 'w')
+		urlFile.write(self.url) 
+		urlFile.close()
+
+	def validURL(self):
+		return self.url != ""
 
 	# PRIVATE
+
+	def _setURL(self, url):
+		if url == self.url:
+			self.url = ""
+			return
+
+		self.url = url
+		try:
+			self._getHTML()
+			self._getNext()
+			self._getImage()
+			self._getTitle()
+			self._getChapter()
+		except (requests.exceptions.RequestException, urllib.error.HTTPError):
+			self.url = ""
+		except IndexError:
+			self.advance()
 
 	def _getImage(self):
 		imageTags = self.htmlSearch.getImages()
@@ -66,53 +109,5 @@ class comicGetter:
 	def _getChapter(self):
 		self.chapterName = self.htmlSearch.getChapter()
 
-	#PUBLIC
-
-	# gets all necessary data from given URL
-	def setURL(self, url):
-		if url == self.url:
-			self.url = ""
-			return
-
-		self.url = url
-		try:
-			self._getHTML()
-			self._getNext()
-			self._getImage()
-			self._getTitle()
-			self._getChapter()
-		except (requests.exceptions.RequestException, urllib.error.HTTPError):
-			self.url = ""
-		except IndexError:
-			self.advance()
-
-	# same as set URL, but will prioritize an existing file conatining a URL if it exists.
-	# this allows the script to maintain state if ran in multiple sessions.
-	def setURLorPast(self, URL):
-		if(os.path.isfile(self.urlFilename)):
-			urlFile = open(self.urlFilename, 'r')
-			self.setURL(urlFile.readline())
-			urlFile.close()
-			self.advance()
-		else:
-			self.setURL(URL)
-
-	# sets the current comic to the next comic.
-	def advance(self):
-		try:
-			for file in self.imageFiles:
-				os.remove(file)
-		except OSError:
-			pass
-		self.setURL(self.next)
-
-	# save data to the file
-	def save(self):
-		urlFile = open(self.urlFilename, 'w')
-		urlFile.write(self.url) 
-		urlFile.close()
-
-	# returns true if the current URL is valid.
-	def validURL(self):
-		return self.url != ""
+	
 
