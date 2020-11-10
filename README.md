@@ -1,12 +1,8 @@
 # Autocomic
 
-<<<<<<< HEAD
-
 # This is a script that turns online comics into pdf's. Given a 'comic.json' file with a certain syntax, it can crawl and convert many different formats.
 
 This is a script that turns online comics into pdf's. Given a 'comic.json' or 'comic.yml' file with certain attriubyes, it can crawl and convert any newly any webcomic.
-
-> > > > > > > f72132f80b8ab254b19eec54fe29cdda9bbafb3a
 
 ## Installation
 

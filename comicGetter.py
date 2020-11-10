@@ -1,12 +1,12 @@
-import requests
-from requests_html import HTML
-import urllib.request
-from urllib.parse import urlparse
 import os
 import re
 
 from htmlSearch.CSSSearch import CSSSearch
 from htmlSearch.RegexSearch import RegexSearch
+from webpageGetter.webpageGetter import webpageGetter
+
+import requests
+import urllib.request
 
 # gets comic info
 class comicGetter:
@@ -15,14 +15,12 @@ class comicGetter:
 		self.url = ""
 		self.next = ""
 		self.imageFiles = []
-		self.baseURL = ""
-		self.basePath = ""
 		self.titleText = ""
 		self.title = ""
+		self.chapterName = ""
+		
 		self.urlFilename = ".url"
 
-		self.chapterName = ""
-		self.noQueryURL = ""
 
 		imgSelect = info["comicSelect"]
 		titleSelect = info["titleSelect"]
@@ -38,20 +36,10 @@ class comicGetter:
 		else:
 			self.htmlSearch = RegexSearch(imgSelect, titleSelect, nextSelect, chapterElement, chapterGet)
 		
-		self.runJavascript = False if runJavascript is None or runJavascript is False else True
+		self.webpageGetter = webpageGetter(runJavascript)
 
-		self.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.118 Safari/537.36"
-		opener = urllib.request.build_opener()
-		opener.addheaders = [('User-agent', self.userAgent)]
-		urllib.request.install_opener(opener)
 
 	# PRIVATE
-	def _downloadImage(self, imageTag):
-			imageURL = self._getFullURL(imageTag.strip().replace(' ', '%20'))
-			local_filename = urllib.request.urlretrieve(imageURL)[0]
-		
-			return local_filename
-
 
 	def _getImage(self):
 		imageTags = self.htmlSearch.getImages()
@@ -59,7 +47,7 @@ class comicGetter:
 		self.imageFiles = []
 		for (imageURL, titleText) in imageTags:
 			if (imageURL is not None):
-				self.imageFiles.append(self._downloadImage(imageURL))
+				self.imageFiles.append(self.webpageGetter.downloadFile(imageURL))
 			else:
 				raise IndexError()
 
@@ -70,35 +58,10 @@ class comicGetter:
 		self.title = self.htmlSearch.getTitle()
 
 	def _getNext(self):
-		self.next = self._getFullURL(self.htmlSearch.getNext())
+		self.next = self.webpageGetter.getFullURL(self.htmlSearch.getNext())
 
 	def _getHTML(self):
-		text = requests.get(self.url, headers={"User-agent": self.userAgent}).text
-		if self.runJavascript:
-			html = HTML(html=text)
-			html.render(timeout=60)
-			text = html.html
-		self.htmlSearch.setBody(text)
-
-	def _updateBaseURL(self):
-		info = urlparse(self.url)
-		self.baseURL = info.scheme + "://" + info.netloc
-		self.basePath = os.path.dirname(self.url)
-		if ('?' in self.url):
-			self.noQueryURL = self.url[:self.url.index('?')]
-
-	def _getFullURL(self, path):
-		if path == "":
-			return path
-		elif path[0] == '/':
-			return self.baseURL + path
-		elif path[0] == '?':
-			return self.noQueryURL + path
-		elif path[:2] == '..':
-			return re.sub(r"/[^/]*/\.\./", "/", self.noQueryURL + '/' + path)
-		elif path[:4] != "http":
-			return self.basePath + '/' + path
-		return path
+		self.htmlSearch.setBody(self.webpageGetter.getPage(self.url))
 	
 	def _getChapter(self):
 		self.chapterName = self.htmlSearch.getChapter()
@@ -112,7 +75,6 @@ class comicGetter:
 			return
 
 		self.url = url
-		self._updateBaseURL()
 		try:
 			self._getHTML()
 			self._getNext()
