@@ -6,6 +6,9 @@ import os
 from PIL import Image
 import imghdr
 
+VERTICAL_CENTER_WEIGHT = 5
+EDGE_OFFSET = 5
+
 # this file includes functions to split an image along reasonable split points.
 # if a comic is too tall for a page, this will split it along reasonable lines.
 
@@ -70,8 +73,7 @@ def getRowNearCenter(height):
 	values = np.arange(height)
 	return -(np.abs((2 / height) * values - 1) ** 3) + 1
 
-def findBestSplitIndex(image, centerWeight):
-	
+def getImageData(image):
 	red =  np.copy(image[:,:,0])
 	green =  np.copy(image[:,:,1])
 	blue =  np.copy(image[:,:,2])
@@ -80,7 +82,7 @@ def findBestSplitIndex(image, centerWeight):
 	greenAverage = np.average(green)
 	blueAverage = np.average(blue)
 
-	imageData = {
+	return {
 		"r": red,
 		"g": green,
 		"b": blue,
@@ -89,21 +91,20 @@ def findBestSplitIndex(image, centerWeight):
 		"blueMean": blueAverage,
 	}
 
+def findBestSplitIndex(image, centerWeight):
+	imageData = getImageData(image)
+
 	solidColor = 1 - getVariations(imageData)
 	differences = getDifferentFactors(imageData)
 	nearCenter = getRowNearCenter(len(image))
 
 	finalFitness = solidColor + differences + centerWeight * nearCenter
-	#for i in [366, 831]:
-	#	print("{0}: ({1}, {2}, {3})".format(i, solidColor[i], differences[i], nearCenter[i]))
-
 	splitPoint = np.argmax(finalFitness)
 
-	edgeOffset = 5
 	if splitPoint == 0:
-		splitPoint += edgeOffset
+		splitPoint += EDGE_OFFSET
 	elif splitPoint == len(finalFitness) - 1:
-		splitPoint -= edgeOffset
+		splitPoint -= EDGE_OFFSET
 
 	return splitPoint
 
@@ -114,37 +115,40 @@ def split(image, maxHeight, centerWeight=1):
 	splitIndex = findBestSplitIndex(image, centerWeight)
 	return split(image[:splitIndex], maxHeight) + split(image[splitIndex:], maxHeight)
 
-# splits an image into multiple parts. Returns the filenames of the split version.
-def splitFile(imageFile, maxHeight, axis=0):
+def fixFilename(imageFile):
 	fileExtensions = ['jpg', 'gif', 'png']
 	if not any(s in imageFile for s in fileExtensions):
 		imageType = imghdr.what(imageFile)
 		newName = imageFile + '.' + imageType
 		os.rename(imageFile, newName)
 		imageFile = newName
-		
 	imageInit = Image.open(imageFile).convert('RGB')
 	imageInit.save(imageFile)
-	image = None
-	
+	return imageFile
+
+def rotateImage(image):
+	return np.transpose(image, (1, 0, 2))
+
+# splits an image into multiple parts. Returns the filenames of the split version.
+def splitFile(imageFile, maxHeight, axis=0):
+	imageFile = fixFilename(imageFile)
+		
 	image = img.imread(imageFile)
 
 	if axis is not 0:
-		image = np.transpose(image, (1, 0, 2))
-		images = split(image, maxHeight, 5)
+		image = rotateImage(image)
+		images = split(image, maxHeight, VERTICAL_CENTER_WEIGHT)
 	else:
 		images = split(image, maxHeight)
 
 	imageNames=[]
 
-	num = 0
-	for subImage in images:
-		name = "images/" + os.path.splitext(os.path.basename(imageFile))[0] + "-" + str(num) + ".png"
+	for i, subImage in enumerate(images):
+		name = "images/" + os.path.splitext(os.path.basename(imageFile))[0] + "-" + str(i) + ".png"
 		if axis is not 0:
-			subImage = np.transpose(subImage, (1, 0, 2))
+			subImage = rotateImage(subImage)
 		img.imsave(name, subImage.copy(order='C'))
 		imageNames.append(name)
-		num += 1
 
 	return imageNames
 
