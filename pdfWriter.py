@@ -109,6 +109,15 @@ class pdfWriter:
 			self._addComic(comic, image)
 			self.addTitle = False
 	
+	def _stripUnicode(self, string):
+		return escapeString(string.encode('ascii', "xmlcharrefreplace").decode('ascii'))
+	
+	def _getTitle(self, comic):
+		return self._stripUnicode(comic.title) if self.addTitle and comic.title else ""
+
+	def _getMouseover(self, comic):
+		return self._stripUnicode(comic.titleText) if self.addTitle else ""
+
 	def _addComic(self, comic, image):
 		self.comicNumber += 1
 		width, height = getImageDims(image)
@@ -127,13 +136,15 @@ class pdfWriter:
 	def _addComicFullWidth(self, height, comic, image, suffix=""):
 		if height < self.workHeight:
 			image = self._getComicImage(image, suffix)
-			self._addComicInfo(comic.title if self.addTitle and comic.title else "", image, comic.titleText if self.addTitle else "")
+			self._addComicInfo(self._getTitle(comic), image, self._getMouseover(comic))
 		else:
 			splitHeight = min(1, getImageDims(image)[0] / self.workWidth) * (self.workHeight + self.margin)
 			images = splitFile(image, splitHeight)
 			for i in range(len(images)):
 				image = self._getComicImage(images[i], suffix="p" + str(i))
-				self._addComicInfo(comic.title if i == 0 and self.addTitle and comic.title else "", image, comic.titleText if i is len(images) - 1 and self.addTitle else "")
+				self._addComicInfo(self._getTitle(comic) if i == 0 else "",
+					image,
+					self._getMouseover(comic) if i is len(images) - 1 else "")
 				os.remove(images[i])
 	
 	def _addChapterName(self, comic):
@@ -176,8 +187,6 @@ class pdfWriter:
 		return shrinkImage(comic, self.workWidth, title, self.comicNumber, self.pageColor, self.jpgQuality, suffix)
 	
 	def _addComicInfo(self, title, image, mouseover):
-		mouseover = escapeString(mouseover if mouseover else "")
-		title  = escapeString(title)
 		with open(self.bodyFile,'a') as comics:
 			comics.write("\t\\comic{{{0}}}{{{1}}}{{{2}}}\n".format(title, image, mouseover))
 
