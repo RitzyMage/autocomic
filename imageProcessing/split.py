@@ -135,7 +135,7 @@ def splitFile(imageFile, maxHeight, axis=0):
 		
 	image = img.imread(imageFile)
 
-	if axis is not 0:
+	if axis != 0:
 		image = rotateImage(image)
 		images = split(image, maxHeight, VERTICAL_CENTER_WEIGHT)
 	else:
@@ -145,7 +145,7 @@ def splitFile(imageFile, maxHeight, axis=0):
 
 	for i, subImage in enumerate(images):
 		name = "images/" + os.path.splitext(os.path.basename(imageFile))[0] + "-" + str(i) + ".png"
-		if axis is not 0:
+		if axis != 0:
 			subImage = rotateImage(subImage)
 		img.imsave(name, subImage.copy(order='C'))
 		imageNames.append(name)

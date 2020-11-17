@@ -1,14 +1,12 @@
 from comicGetter import comicGetter
 from generateHeader import generateHeader
 import os
-from PIL import Image, ImageFile
 import shutil
 import subprocess
 from imageProcessing.split import splitFile
-from imageProcessing.removeTransparency import remove_transparency
 from imageProcessing.shrinkImage import shrinkImage, getImageDims
 
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 
 def escapeString(toEscape):
 	return toEscape.translate(
