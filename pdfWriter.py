@@ -4,7 +4,9 @@ import os
 from PIL import Image, ImageFile
 import shutil
 import subprocess
-from split import splitFile
+from imageProcessing.split import splitFile
+from imageProcessing.removeTransparency import remove_transparency
+from imageProcessing.shrinkImage import shrinkImage, getImageDims
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -24,62 +26,20 @@ def escapeString(toEscape):
 			"|": "\\|"
 			}))
 
-def remove_transparency(im, bg_color=(255, 255, 255)):
-	if im.mode in ('RGBA', 'LA') or (im.mode == 'P' and 'transparency' in im.info):
 
-		alpha = im.convert('RGBA').split()[-1]
-		bg = Image.new("RGB", im.size, tuple(bg_color) + (255,))
-		bg.paste(im, mask=alpha)
-		return bg
-	if im.mode != 'RGB':
-		return im.convert('RGB')
-	else:
-		return im
-
-def getResizedDims(width, image):
-	percentSmaller = min(width / float(image.size[0]), 1)
-	newHeight = max(int(image.size[1] * percentSmaller), 1)
-	newWidth = max(int(image.size[0] * percentSmaller), 1)
-	return newWidth, newHeight
-
-def getImageDims(filename):
-	image = Image.open(filename)
-	return image.size #getResizedDims(width, image)
-
-def shrinkImage(filename, width, name, number, bgColor, quality, suffix=""):
-	image = Image.open(filename)
-
-	newWidth, newHeight = getResizedDims(width, image) 
-
-	image = image.resize((newWidth, newHeight), Image.ANTIALIAS)
-	image = remove_transparency(image, bgColor)
-	newFilename = "images/" + name + "-" + str(number) + suffix + ".jpg"
-	image.save(newFilename, quality=quality)
-
-	return newFilename
+MARGIN = 20
 
 class pdfWriter:
 	def __init__(self, name, author, pageColor, textColor, optionalHeight, optionalWidth, jpgQuality):
 		self.title = name
 
-		if optionalHeight:
-			self.pageHeight = int(optionalHeight)
-		else:
-			self.pageHeight = 1200
 
-		if optionalWidth: 
-			self.pageWidth = int(optionalWidth)
-		else:
-			self.pageWidth = 800
+		self.pageHeight = int(optionalHeight) if optionalHeight else 1200
+		self.pageWidth = int(optionalWidth) if optionalWidth else 800
+		self.jpgQuality = jpgQuality if jpgQuality else 95
 
-		if jpgQuality:
-			self.jpgQuality = jpgQuality
-		else:
-			self.jpgQuality = 95
-
-		self.margin = 20
-		self.workWidth = self.pageWidth - (2 * self.margin)
-		self.workHeight = self.pageHeight - (2 * self.margin)
+		self.workWidth = self.pageWidth - (2 * MARGIN)
+		self.workHeight = self.pageHeight - (2 * MARGIN)
 		self.comicNumber = 0
 
 		self.lastChapterName = ""
@@ -98,25 +58,23 @@ class pdfWriter:
 			self.lastChapterName = indexFile.readline()
 			indexFile.close()
 
-		generateHeader(name, author, pageColor, textColor, self.pageWidth, self.pageHeight, self.margin)
+		generateHeader(name, author, pageColor, textColor, self.pageWidth, self.pageHeight, MARGIN)
 
 		if not os.path.exists('images'):
 			os.makedirs('images')
 
 	def addComic(self, comic):
-		self.addTitle = True
 		for image in comic.imageFiles:
 			self._addComic(comic, image)
-			self.addTitle = False
 	
 	def _stripUnicode(self, string):
 		return escapeString(string.encode('ascii', "xmlcharrefreplace").decode('ascii'))
 	
 	def _getTitle(self, comic):
-		return self._stripUnicode(comic.title) if self.addTitle and comic.title else ""
+		return self._stripUnicode(comic.title) if comic.title else ""
 
 	def _getMouseover(self, comic):
-		return self._stripUnicode(comic.titleText) if self.addTitle else ""
+		return self._stripUnicode(comic.titleText)
 
 	def _addComic(self, comic, image):
 		self.comicNumber += 1
@@ -129,7 +87,6 @@ class pdfWriter:
 			images = splitFile(image, self.workWidth, axis=1)
 			for i in range(len(images)):
 				self._addComicFullWidth(height, comic, images[i], suffix="h" + str(i))
-				self.addTitle = False
 		else:
 			self._addComicFullWidth(height, comic, image)
 
@@ -138,7 +95,7 @@ class pdfWriter:
 			image = self._getComicImage(image, suffix)
 			self._addComicInfo(self._getTitle(comic), image, self._getMouseover(comic))
 		else:
-			splitHeight = min(1, getImageDims(image)[0] / self.workWidth) * (self.workHeight + self.margin)
+			splitHeight = min(1, getImageDims(image)[0] / self.workWidth) * (self.workHeight + MARGIN)
 			images = splitFile(image, splitHeight)
 			for i in range(len(images)):
 				image = self._getComicImage(images[i], suffix="p" + str(i))
