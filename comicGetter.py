@@ -8,6 +8,13 @@ from webpageGetter.webpageGetter import webpageGetter
 import requests
 import urllib.request
 
+class NoImageError(Exception):
+	def __init__(self, *args):
+		self.message = args[0]
+
+	def __str__(self):
+		return '< No Image Error: {0} >'.format(self.message)
+
 # gets comic info
 class comicGetter:
 	def __init__(self, info):
@@ -44,10 +51,12 @@ class comicGetter:
 		if(os.path.isfile(self.urlFilename)):
 			urlFile = open(self.urlFilename, 'r')
 			self._setURL(urlFile.readline())
+			print("set URL from file to", self.url)
 			urlFile.close()
 			self.advance()
 		else:
 			self._setURL(URL)
+			print("starting with url", self.url)
 
 	def advance(self):
 		try:
@@ -69,6 +78,7 @@ class comicGetter:
 
 	def _setURL(self, url):
 		if url == self.url:
+			print("next URL was", url, "which is the same URL as last. Finishing...")
 			self.url = ""
 			return
 
@@ -79,20 +89,24 @@ class comicGetter:
 			self._getImage()
 			self._getTitle()
 			self._getChapter()
-		except (requests.exceptions.RequestException, urllib.error.HTTPError):
+		except (requests.exceptions.RequestException, urllib.error.HTTPError) as e:
+			print("could not get url, details:", e)
 			self.url = ""
-		except IndexError:
+		except NoImageError as e:
+			print("expected exeption", e,  "encountered, advancing")
 			self.advance()
 
 	def _getImage(self):
 		imageTags = self.htmlSearch.getImages()
+		if len(imageTags) == 0:
+			raise NoImageError("found no images")
+		print("found images", imageTags)
 
 		self.imageFiles = []
 		for (imageURL, titleText) in imageTags:
-			if (imageURL is not None):
-				self.imageFiles.append(self.webpageGetter.downloadFile(imageURL))
-			else:
-				raise IndexError()
+			if not imageURL:
+				raise NoImageError("found image with no src")
+			self.imageFiles.append(self.webpageGetter.downloadFile(imageURL))
 
 			if (self.hasTitleText):
 				self.titleText = titleText
@@ -102,6 +116,10 @@ class comicGetter:
 
 	def _getNext(self):
 		self.next = self.webpageGetter.getFullURL(self.htmlSearch.getNext())
+		if self.next:
+			print("got next link", self.next)
+		else:
+			print("no next link found")
 
 	def _getHTML(self):
 		self.htmlSearch.setBody(self.webpageGetter.getPage(self.url))

@@ -36,12 +36,18 @@ comic.setURLifUnset(firstURL)
 
 try:
 	while comic.validURL() and not killed:
-		print("getting comic", pdf.comicNumber + 1)
 		pdf.addComic(comic)
 		comic.save()
 		pdf.save()
+
+		print("\n")
+		print(pdf.comicNumber + 1)
+		print("****\t****\t****")
 		comic.advance()
 except RuntimeError:
-	print("Warning: pressing ^C when running javascipt could have unintended consequences")
+	print("Warning: pressing ^C when running javascript could have unintended consequences")
 	
+if not killed:
+	print("finishing")
+
 pdf.finish()

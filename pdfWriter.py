@@ -56,7 +56,9 @@ class pdfWriter:
 
     # PUBLIC
     def addComic(self, comic):
+        print("adding comic", self.comicNumber + 1, "to pdf")
         for image in comic.imageFiles:
+            print("adding image", image, "to pdf")
             self._addComic(comic, image)
 
     def save(self):
@@ -83,10 +85,14 @@ class pdfWriter:
 
     # PRIVATE
     def _restoreState(self):
-        if(os.path.isfile(INDEX_FILENAME)):
+        if (os.path.isfile(INDEX_FILENAME)):
+            print("restoring state of pdf")
             indexFile = open(INDEX_FILENAME, 'r')
             self.comicNumber = int(indexFile.readline())
             self.lastChapterName = indexFile.readline()
+            print("set comic number to", self.comicNumber)
+            if (self.lastChapterName):
+                print("set chapter name to", self.lastChapterName)
             indexFile.close()
 
     def _stripUnicode(self, string):
@@ -105,6 +111,7 @@ class pdfWriter:
         self._addChapterName(comic)
 
         if width >= self.workWidth * MAX_WIDTH and height < self.workHeight:
+            print("image", image, "is too wide; splitting...")
             images = splitFile(image, self.workWidth, axis=1)
             for i in range(len(images)):
                 self._addComicFullWidth(comic, images[i], "h" + str(i))
@@ -120,6 +127,7 @@ class pdfWriter:
             image = self._getComicImage(image, suffix)
             self._addComicInfo(title, image, mouseover)
         else:
+            print("image", image, "is too tall; splitting")
             shrinkFactor = min(1, height / self.workWidth)
             splitHeight = shrinkFactor * (self.workHeight + MARGIN)
             images = splitFile(image, splitHeight)
@@ -158,6 +166,7 @@ class pdfWriter:
         return shrinkImage(comic, self.workWidth, title, self.comicNumber, self.pageColor, self.jpgQuality, suffix)
 
     def _addComicInfo(self, title, image, mouseover):
+        print("adding comic info", title, "-", image, "-", mouseover)
         with open(BODY_FILE, 'a') as comics:
             comics.write("\t\\comic{{{0}}}{{{1}}}{{{2}}}\n".format(
                 title, image, mouseover))
