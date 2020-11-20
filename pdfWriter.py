@@ -68,7 +68,8 @@ class pdfWriter:
         indexFile.close()
 
     def finish(self):
-        finalFilename = 'result.latex'
+        escapedName = self.title.replace(' ', '')
+        finalFilename = escapedName + '.latex'
         with open(finalFilename, 'w') as finalFile:
             for f in [HEADER_FILE, BODY_FILE]:
                 with open(f, 'r') as currentFile:
@@ -77,11 +78,11 @@ class pdfWriter:
 
         subprocess.run(["rubber", "-d", finalFilename])
 
-        os.remove("result.latex")
-        os.remove("result.aux")
-        os.remove("result.log")
+        os.remove(finalFilename)
+        os.remove(escapedName + ".aux")
+        os.remove(escapedName + ".log")
         if self.lastChapterName != "":
-            os.remove("result.toc")
+            os.remove(escapedName + ".toc")
 
     # PRIVATE
     def _restoreState(self):
