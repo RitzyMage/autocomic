@@ -124,7 +124,7 @@ class pdfWriter:
         title = self._getTitle(comic)
         mouseover = self._getMouseover(comic)
 
-        if height < self.workHeight:
+        if height < self.workHeight + MARGIN:
             image = self._getComicImage(image, suffix)
             self._addComicInfo(title, image, mouseover)
         else:
@@ -137,7 +137,7 @@ class pdfWriter:
     def _addSplitImages(self, images, title, mouseover, suffix=""):
         for i in range(len(images)):
             _suffix = suffix + "p" + str(i)
-            image = self._getComicImage(images[i], suffix)
+            image = self._getComicImage(images[i], _suffix)
             _title = title if i == 0 else ""
             _mouseover = mouseover if i is len(images) - 1 else ""
             self._addComicInfo(_title, image, _mouseover)
