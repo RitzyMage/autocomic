@@ -6,10 +6,12 @@ import requests
 from requests_html import HTML
 
 class webpageGetter:
-	def __init__(self, runJavascript):
+	def __init__(self, runJavascript, javascriptTimeout):
 		self.baseURL = ""
 		self.basePath = ""
 		self.noQueryURL = ""
+
+		self.timeout = javascriptTimeout
 
 		self.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.118 Safari/537.36"
 		opener = urllib.request.build_opener()
@@ -49,7 +51,7 @@ class webpageGetter:
 		if self.runJavascript:
 			print("\trunning javascript...")
 			html = HTML(html=text)
-			html.render(timeout=60)
+			html.render(timeout=self.timeout)
 			text = html.html
 			print("\tdone.")
 		return text

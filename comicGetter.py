@@ -35,7 +35,10 @@ class comicGetter:
 		chapterElement = info["chapterElement"] if chapters else None
 		chapterGet = info["chapterRegex"] if chapters else None
 		useCSS = info.get("useCSS")
+
 		runJavascript = info.get("runJavascript")
+		javascriptTimeout = (info.get("javascriptTimeout") or 60) if runJavascript else None
+
 		nextSelect = info["nextSelect"]
 
 		if useCSS is None or useCSS:
@@ -43,7 +46,7 @@ class comicGetter:
 		else:
 			self.htmlSearch = RegexSearch(imgSelect, titleSelect, nextSelect, chapterElement, chapterGet)
 		
-		self.webpageGetter = webpageGetter(runJavascript)
+		self.webpageGetter = webpageGetter(runJavascript, javascriptTimeout)
 
 	#PUBLIC
 

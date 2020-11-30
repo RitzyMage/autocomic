@@ -27,6 +27,4 @@ optionalHeight:
 optionalWidth: 
 jpgQuality:
 
-useCSS: true
-runJavascript: false
 EOF

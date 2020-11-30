@@ -66,6 +66,7 @@ comic.yml contains the following variables:
 -   optionalHeight: [optional] some comics need a different page height. specify this as a value in pixels and the pages pf the generated pdf will be that height.
 -   useCSS: [optional] defaults to true. If set to false, comicSelect, nextSelect, and chapterElement will expect a regex for selecting the correct element rather than the CSS selectors. In general, this is hard to use and inconsistent. It may be necessary for some comics with inconsistent page design between strips, but should only be used as a last resort. (Out of the hundreds of comics tried, this option was needed for only one comic).
 -   runJavascript: [optional] (defaults to false). If set to true, the script will run javascript on each downloaded page. This makes the script run much slower and can cause hard-to-diagnose errors, so avoid setting to true if possible.
+-   javascriptTimeout: [optional] (defaults to 60). If runJavascript is set to true, this is how long the script will run javascript before throwing an error
 
 ### cleanup
 
