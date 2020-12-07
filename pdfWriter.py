@@ -128,7 +128,7 @@ class pdfWriter:
             image = self._getComicImage(image, suffix)
             self._addComicInfo(title, image, mouseover)
         else:
-            print("image", image, "is too tall; splitting")
+            print("image", image, "is too tall (", height, "px on a ", self.workHeight ,"px page); splitting")
             shrinkFactor = min(1, height / self.workWidth)
             splitHeight = shrinkFactor * (self.workHeight + MARGIN)
             images = splitFile(image, splitHeight)
