@@ -4,7 +4,7 @@ import os
 import shutil
 import subprocess
 from imageProcessing.split import splitFile
-from imageProcessing.shrinkImage import shrinkImage, getImageDims
+from imageProcessing.shrinkImage import shrinkImage, getImageDims, getResizedDims
 
 
 def escapeString(toEscape):
@@ -120,7 +120,7 @@ class pdfWriter:
             self._addComicFullWidth(comic, image)
 
     def _addComicFullWidth(self, comic, image, suffix=""):
-        height = getImageDims(image)[1]
+        height = getResizedDims(self.workWidth, image)[1]
         title = self._getTitle(comic)
         mouseover = self._getMouseover(comic)
 

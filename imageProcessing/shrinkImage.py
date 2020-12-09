@@ -16,6 +16,8 @@ def remove_transparency(im, bg_color=(255, 255, 255)):
 		return im
 
 def getResizedDims(width, image):
+	if (isinstance(image, str)):
+		image = Image.open(image)
 	percentSmaller = min(width / float(image.size[0]), 1)
 	newHeight = max(int(image.size[1] * percentSmaller), 1)
 	newWidth = max(int(image.size[0] * percentSmaller), 1)
