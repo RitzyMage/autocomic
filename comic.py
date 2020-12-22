@@ -29,13 +29,18 @@ with open(filename, 'r') as file:
 	width = info.get("optionalWidth")
 	jpgQuality = info.get("jpgQuality")
 
+	limit = info.get("limit")
+
 pdf = pdfWriter(name, author, pageColor, textColor, height, width, jpgQuality)
 comic = comicGetter(info)
 
 comic.setURLifUnset(firstURL)
 
+def limitReached():
+	return limit and pdf.comicNumber + 1 >= limit
+
 try:
-	while comic.validURL() and not killed:
+	while comic.validURL() and not killed and not limitReached():
 		pdf.addComic(comic)
 		comic.save()
 		pdf.save()
