@@ -1,6 +1,11 @@
 #!/bin/bash
 
+ERROR='\033[0;31m'
+SUCCESS='\033[0;32m'
+RESET_COLOR='\033[0m' 
+
 fail() {
+    echo -e "${ERROR}TEST FAILED${RESET_COLOR}"
     echo "$1 and $2 did not match; exiting"
     exit 1
 }
@@ -15,6 +20,7 @@ compare() {
 
 #usage: testComic $comicName $ymlFile $expectedResult
 testComic() {
+    echo "testing $3"
     rootDir="$(pwd)"
     mkdir $1
     cd $1
@@ -28,19 +34,18 @@ testComic() {
     rmdir $1
 }
     
-echo "testing over the wall"
 testComic overTheWall over-the-wall.yml OverTheWall.pdf
-# test comics:
-# a basic comic
-# image splitting (vertical)
-# image splitting (horizontal)
-# image splitting (horizontal + vertical) (?)
-# comics with mouseover text and titles
-# comics with chapters
-# running javascript
-# using regex instead of CSS selectors
-# a comic that has pages with no images
-# a comic with multiple images per page
 
+# TODO image splitting (vertical)
+# TODO image splitting (horizontal)
+# TODO image splitting (horizontal + vertical) (?)
+# TODO comics with mouseover text and titles
+# TODO comics with chapters
+# TODO running javascript
+# TODO using regex instead of CSS selectors
+# TODO a comic that has pages with no images
+# TODO a comic with multiple images per page
 
-# wait for script output and stop with SIGINT
+# TODO wait for script output and stop with SIGINT
+
+echo -e "\n${SUCCESS}ALL TESTS PASSED${RESET_COLOR}"
