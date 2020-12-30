@@ -1,0 +1,24 @@
+name: Over The Wall
+author: Peter Wartman
+
+pageColor: [255, 255, 255]
+textColor: black
+
+comicSelect: .webcomic-image img
+titleSelect:
+mouseover: false
+
+nextSelect: .webcomic-image a
+firstURL: http://overthewallcomic.com/otw/cover/
+
+chapters: false
+chapterElement:
+chapterRegex:
+
+optionalHeight: 900
+optionalWidth: 610
+jpgQuality:
+
+useCSS: true
+
+limit: 5
