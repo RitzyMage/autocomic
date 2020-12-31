@@ -1,0 +1,24 @@
+{
+    "name": "Pepper And Carrot",
+    "author": "David Revoy",
+
+    "pageColor": [255, 255, 255],
+    "textColor": "black",
+
+    "comicSelect": ".comicpage",
+    "titleSelect": "",
+    "mouseover": false,
+
+    "nextSelect": "div:nth-child(3) > div > a.readernavbutton",
+    "firstURL": "https://www.peppercarrot.com/en/article234/potion-of-flight",
+
+
+    "chapters": false,
+    "chapterElement": "",
+    "chapterRegex": "",
+
+    "optionalHeight":1800,
+    "optionalWidth":1300,
+    "jpgQuality":"",
+    "limit": 2
+}

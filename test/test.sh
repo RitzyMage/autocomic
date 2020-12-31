@@ -15,12 +15,12 @@ pdfInfo() {
 }
 
 compare() {
-    return $(cmp -b <(pdfInfo $1) <(pdfInfo $2))
+    cmp -b <(pdfInfo $1) <(pdfInfo $2)
 }
 
 #usage: testComic $comicName $ymlFile $expectedResult
 testComic() {
-    echo "testing $3"
+    echo "testing $1"
     rootDir="$(pwd)"
     mkdir $1
     cd $1
@@ -29,14 +29,17 @@ testComic() {
     echo "comparing $rootDir/$3 with" *.pdf
     compare "$rootDir/$3" *.pdf  || fail "$rootDir/$3" *.pdf
     cleanupComic
-    rm comic.yml
+    rm comic.yml || rm comic.json
     cd ..
     rmdir $1
 }
-    
+
+#simple basic test
 testComic overTheWall over-the-wall.yml OverTheWall.pdf
 
-# TODO image splitting (vertical)
+# image splitting (vertical) and JSON 
+testComic pepperAndCarrot pepperAndCarrot.json PepperAndCarrot.pdf
+
 # TODO image splitting (horizontal)
 # TODO image splitting (horizontal + vertical) (?)
 # TODO comics with mouseover text and titles
@@ -45,7 +48,10 @@ testComic overTheWall over-the-wall.yml OverTheWall.pdf
 # TODO using regex instead of CSS selectors
 # TODO a comic that has pages with no images
 # TODO a comic with multiple images per page
+# TODO different jpg quality
 
 # TODO wait for script output and stop with SIGINT
+
+# TODO test individually or collectively
 
 echo -e "\n${SUCCESS}ALL TESTS PASSED${RESET_COLOR}"
