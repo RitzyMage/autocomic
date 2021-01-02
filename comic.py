@@ -55,4 +55,9 @@ except RuntimeError:
 if not killed:
 	print("finishing")
 
+if pdf.comicNumber == 0:
+	pdf.addComic(comic)
+	comic.save()
+	pdf.save()
+
 pdf.finish()

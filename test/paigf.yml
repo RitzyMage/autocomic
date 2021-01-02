@@ -1,0 +1,23 @@
+name: Professor Amazing and the Incredible Golden Fox
+author:
+
+pageColor: [255, 255, 255]
+textColor: black
+
+comicSelect: "#comicimage"
+titleSelect:
+mouseover: false
+
+nextSelect: 'a[title="next comic"]'
+firstURL: http://paigf.thecomicseries.com/comics/213/
+
+chapters: false
+chapterElement: .comicnavlink option[selected]
+chapterRegex: "[^-]*"
+
+optionalHeight:
+optionalWidth:
+jpgQuality:
+
+useCSS: true
+limit: 1

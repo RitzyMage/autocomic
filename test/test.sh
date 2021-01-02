@@ -37,8 +37,8 @@ testComic() {
 #simple basic test
 testComic overTheWall over-the-wall.yml OverTheWall.pdf
 
-# image splitting (vertical) and JSON 
-testComic pepperAndCarrot pepperAndCarrot.json PepperAndCarrot.pdf
+# TODO image splitting (vertical)
+testComic paigf paigf.yml ProfessorAmazingandtheIncredibleGoldenFox.pdf
 
 # TODO image splitting (horizontal)
 # TODO image splitting (horizontal + vertical) (?)
@@ -47,7 +47,10 @@ testComic pepperAndCarrot pepperAndCarrot.json PepperAndCarrot.pdf
 # TODO running javascript
 # TODO using regex instead of CSS selectors
 # TODO a comic that has pages with no images
-# TODO a comic with multiple images per page
+
+# a comic with multiple images per page and JSON
+testComic pepperAndCarrot pepperAndCarrot.json PepperAndCarrot.pdf
+
 # TODO different jpg quality
 
 # TODO wait for script output and stop with SIGINT
