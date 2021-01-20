@@ -46,6 +46,7 @@ class webpageGetter:
 	def getPage(self, url):
 		url = self.getFullURL(url)
 		self._updateBaseURL(url)
+		print("getting", url)
 		text = requests.get(url, headers={"User-agent": self.userAgent}).text
 		print("got page from URL", url, "with length", len(text))
 		if self.runJavascript:

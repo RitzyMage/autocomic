@@ -1,0 +1,18 @@
+name: Order of The Stick
+author: Rich Burlew
+
+pageColor: [255, 255, 255]
+textColor: black
+
+comicSelect: 'td[align="center"] > img'
+titleSelect:
+mouseover: false
+
+nextSelect: 'td[width="80%"] a:nth-child(7)'
+firstURL: http://www.giantitp.com/comics/oots0749.html
+
+chapters: false
+
+optionalHeight: 1100
+
+limit: 3

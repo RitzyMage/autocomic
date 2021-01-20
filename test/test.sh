@@ -37,10 +37,12 @@ testComic() {
 #simple basic test
 testComic overTheWall over-the-wall.yml OverTheWall.pdf
 
-# TODO image splitting (vertical)
+# image splitting (vertical)
 testComic paigf paigf.yml ProfessorAmazingandtheIncredibleGoldenFox.pdf
 
-# TODO image splitting (horizontal)
+# image splitting (horizontal)
+testComic orderOfTheStick orderOfTheStick.yml OrderOfTheStick.pdf
+
 # TODO image splitting (horizontal + vertical) (?)
 # TODO comics with mouseover text and titles
 # TODO comics with chapters
