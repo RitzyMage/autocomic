@@ -34,6 +34,8 @@ testComic() {
     rmdir $1
 }
 
+# todo format headers for each test and show success for each test
+
 #simple basic test
 testComic overTheWall over-the-wall.yml OverTheWall.pdf
 
@@ -57,6 +59,6 @@ testComic pepperAndCarrot pepperAndCarrot.json PepperAndCarrot.pdf
 
 # TODO wait for script output and stop with SIGINT
 
-# TODO test individually or collectively
+# TODO run tests individually or collectively
 
 echo -e "\n${SUCCESS}ALL TESTS PASSED${RESET_COLOR}"
