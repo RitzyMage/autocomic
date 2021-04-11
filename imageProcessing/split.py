@@ -118,7 +118,8 @@ def split(image, maxHeight, centerWeight=1):
 def fixFilename(imageFile):
 	fileExtensions = ['jpg', 'gif', 'png']
 	if not any(s in imageFile for s in fileExtensions):
-		imageType = imghdr.what(imageFile)
+		imageType = imghdr.what(imageFile) or 'jpeg'
+		print(imageFile, imageType)
 		newName = imageFile + '.' + imageType
 		os.rename(imageFile, newName)
 		imageFile = newName

@@ -45,7 +45,6 @@ testComic paigf paigf.yml ProfessorAmazingandtheIncredibleGoldenFox.pdf
 # image splitting (horizontal)
 testComic orderOfTheStick orderOfTheStick.yml OrderOfTheStick.pdf
 
-# TODO image splitting (horizontal + vertical) (?)
 # TODO comics with mouseover text and titles
 # TODO comics with chapters
 # TODO running javascript
