@@ -19,7 +19,7 @@ Python 3
 -   numpy
 -   PIL
 
-[Rubber (LaTeX compiler)](https://github.com/petrhosek/rubber)
+[Rubber (LaTeX compiler)](https://gitlab.com/latex-rubber/rubber/)
 
 -   graphicx
 -   xcolor
