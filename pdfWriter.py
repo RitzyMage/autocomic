@@ -79,8 +79,12 @@ class pdfWriter:
         subprocess.run(["rubber", "-d", finalFilename])
 
         os.remove(finalFilename)
-        os.remove(escapedName + ".aux")
-        os.remove(escapedName + ".log")
+        try:
+            os.remove(escapedName + ".aux")
+            os.remove(escapedName + ".log")
+            os.remove(escapedName + ".rubbercache")
+        except OSError:
+            pass
         if self.lastChapterName != "":
             os.remove(escapedName + ".toc")
 
