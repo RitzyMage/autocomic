@@ -22,6 +22,7 @@ class webpageGetter:
 		self.runJavascript = False if not runJavascript else True
 
 	def getFullURL(self, path):
+		path = path.replace("\n", "")
 		if path == "":
 			return path
 		elif path[0] == '/':
