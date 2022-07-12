@@ -107,7 +107,7 @@ class pdfWriter:
         return self._stripUnicode(comic.title) if comic.title else ""
 
     def _getMouseover(self, comic):
-        return self._stripUnicode(comic.titleText)
+        return self._stripUnicode(comic.titleText) if comic.titleText else ""
 
     def _addComic(self, comic, image):
         self.comicNumber += 1
