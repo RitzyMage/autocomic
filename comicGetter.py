@@ -109,7 +109,7 @@ class comicGetter:
 		for (imageURL, titleText) in imageTags:
 			if not imageURL:
 				raise NoImageError("found image with no src")
-			self.imageFiles.append(self.webpageGetter.downloadFile(imageURL))
+			self.imageFiles.append(self.webpageGetter.downloadFile(self.webpageGetter.getFullURL(imageURL)))
 
 			if (self.hasTitleText):
 				self.titleText = titleText

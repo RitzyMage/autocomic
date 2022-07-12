@@ -29,7 +29,7 @@ class webpageGetter:
 		elif path[0] == '?':
 			return self.noQueryURL + path
 		elif path[:2] == '..':
-			return re.sub(r"/[^/]*/\.\./", "/", self.noQueryURL + '/' + path)
+			return re.sub(r"/[^/]*/\.\./", "/", (self.noQueryURL or self.basePath) + '/' + path) 
 		elif path[:4] != "http":
 			return self.basePath + '/' + path
 		return path
