@@ -32,7 +32,7 @@ def shrinkImage(filename, width, name, number, bgColor, quality, suffix=""):
 
 	newWidth, newHeight = getResizedDims(width, image) 
 
-	image = image.resize((newWidth, newHeight), Image.ANTIALIAS)
+	image = image.resize((newWidth, newHeight), Image.LANCZOS)
 	image = remove_transparency(image, bgColor)
 	newFilename = "images/" + name + "-" + str(number) + suffix + ".jpg"
 	image.save(newFilename, quality=quality)
